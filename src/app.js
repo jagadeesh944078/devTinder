@@ -1,9 +1,33 @@
 const express = require("express");
+const { adminAuth, userAuth } = require("./middlewares/auth");
 
 /* creating new expressJs application from express method */
 const app = express();
 
 /* Here Order Is Very Important */
+
+app.use("/admin", adminAuth);
+
+app.get("/admin/getAllData", (req, res) => {
+  res.send("got the admin data");
+});
+
+app.get("/admin/deleteUser", (req, res) => {
+  res.send("deleted the user data");
+});
+
+app.use(
+  "/user",
+  userAuth,
+  (req, res, next) => {
+    next();
+    res.send("Response Recorded");
+  },
+  (req, res) => {
+    console.log("2nd response");
+    res.send("2nd response");
+  }
+);
 
 app.get("/user", (req, res) => {
   res.send({ firstName: "Jagadeesh", lastName: "vemul" });

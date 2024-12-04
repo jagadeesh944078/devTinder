@@ -56,3 +56,5 @@
 -      app.get(/.\*fly$/, (req, res) => {
         res.send({ firstName: "Jagadeesh", lastName: "vemul" });
        });
+
+- express takes and matches with all routes and goes thorugh the middleware one after another till it send the response back.so here only job of the express is take the request and give the response as soon as possible.it goes in the order keep checking the things
