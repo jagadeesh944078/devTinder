@@ -8,8 +8,14 @@ const app = express();
 
 app.use("/admin", adminAuth);
 
+/* Error Handler */
 app.get("/admin/getAllData", (req, res) => {
+  // try {
+  throw new Error("dsfg");
   res.send("got the admin data");
+  // } catch (err) {
+  //   res.status(500).send("some error contact support team");
+  // }
 });
 
 app.get("/admin/deleteUser", (req, res) => {
@@ -49,7 +55,10 @@ app.use("/hello", () => {
   res.send("Hello Hello Hello");
 });
 
-app.use("/", (req, res) => {
+app.use("/", (err, req, res, next) => {
+  if (err) {
+    res.status(500).send("somethig went wrong");
+  }
   res.send("hello from the server");
 });
 
