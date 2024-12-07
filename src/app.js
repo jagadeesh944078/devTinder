@@ -43,6 +43,46 @@ app.get("/feed", async (req, res) => {
   }
 });
 
+/* delete the user */
+app.delete("/user", async (req, res) => {
+  const userId = req.body.userId;
+  try {
+    const user = await User.findByIdAndDelete(userId);
+    res.send("deleted the user successfully");
+  } catch (err) {
+    res.status(400).send("something went wrong");
+  }
+});
+
+/* Update the User by UserId */
+app.patch("/user", async (req, res) => {
+  const userId = req.body.userId;
+  const data = req.body;
+  try {
+    /* this user will return before updating data in mongodb if you keep after then update data returns */
+    const user = await User.findOneAndUpdate({ _id: userId }, data, {
+      returnDocument: "before",
+    });
+    console.log(user, "id");
+    res.send("updated user data successfully");
+  } catch (err) {
+    res.status(400).send("something went wrong");
+  }
+});
+
+/* Update the user by emailId */
+app.patch("/user", async (req, res) => {
+  const emailId = req.body.emailId;
+  const data = req.body;
+  try {
+    const user = await User.findOneAndUpdate({ emailId: emailId }, data);
+    console.log(user, "email");
+    res.status("user updated by emailid successfully");
+  } catch (err) {
+    res.status(400).send("something went wrong");
+  }
+});
+
 connectDB()
   .then(() => {
     console.log("connect to the db successfully");
