@@ -60,13 +60,18 @@ app.patch("/user", async (req, res) => {
   const data = req.body;
   try {
     /* this user will return before updating data in mongodb if you keep after then update data returns */
-    const user = await User.findOneAndUpdate({ _id: userId }, data, {
-      returnDocument: "before",
-    });
+    const user = await User.findOneAndUpdate(
+      { _id: userId },
+      data,
+      {
+        returnDocument: "before",
+      },
+      { runValidatore: true }
+    );
     console.log(user, "id");
     res.send("updated user data successfully");
   } catch (err) {
-    res.status(400).send("something went wrong");
+    res.status(400).send("Update Failed" + err.message);
   }
 });
 
