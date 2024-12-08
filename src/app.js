@@ -55,10 +55,20 @@ app.delete("/user", async (req, res) => {
 });
 
 /* Update the User by UserId */
-app.patch("/user", async (req, res) => {
-  const userId = req.body.userId;
+app.patch("/user/:userId", async (req, res) => {
+  const userId = req.params?.userId;
   const data = req.body;
   try {
+    const ALLOWED_UPDATES = ["photourl", "about", "gender", "age", "skills"];
+    const isUpdateAllowed = Object.keys(data).every((k) =>
+      ALLOWED_UPDATES.includes(k)
+    );
+    if (!isUpdateAllowed) {
+      throw new Error("Update Not Allowed");
+    }
+    if (data.skills.length > 10) {
+      throw new Error("Skills can't be more than 10");
+    }
     /* this user will return before updating data in mongodb if you keep after then update data returns */
     const user = await User.findOneAndUpdate(
       { _id: userId },
@@ -71,7 +81,7 @@ app.patch("/user", async (req, res) => {
     console.log(user, "id");
     res.send("updated user data successfully");
   } catch (err) {
-    res.status(400).send("Update Failed" + err.message);
+    res.status(400).send("Update Failed:" + err.message);
   }
 });
 
@@ -80,6 +90,16 @@ app.patch("/user", async (req, res) => {
   const emailId = req.body.emailId;
   const data = req.body;
   try {
+    const ALLOWED_UPDATES = ["photourl", "about", "gender", "age", "skills"];
+    const isUpdateAllowed = Object.keys(data).every((k) =>
+      ALLOWED_UPDATES.includes(k)
+    );
+    if (!isUpdateAllowed) {
+      throw new Error("Update Not Allowed");
+    }
+    if (data.skills.length > 10) {
+      throw new Error("Skills can't be more than 10");
+    }
     const user = await User.findOneAndUpdate({ emailId: emailId }, data);
     console.log(user, "email");
     res.status("user updated by emailid successfully");
