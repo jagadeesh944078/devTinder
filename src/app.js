@@ -3,13 +3,21 @@ const connectDB = require("./config/database");
 const User = require("./models/user");
 const app = express();
 const { validationSignup } = require("./utils/validation");
+const bcrypt = require("bcrypt");
 
 app.use(express.json());
 
 app.post("/signup", async (req, res) => {
   try {
     validationSignup(req);
-    const user = new User(req.body);
+    const { firstName, lastName, emailId, passWord } = req.body;
+    const passwordHash = await bcrypt.hash(passWord, 10);
+    const user = new User({
+      firstName,
+      lastName,
+      emailId,
+      passWord: passwordHash,
+    });
     await user.save();
     res.send("user data saved successfully");
   } catch (err) {
