@@ -6,6 +6,7 @@ const { validationSignup } = require("./utils/validation");
 const bcrypt = require("bcrypt");
 const cookieParser = require("cookie-parser");
 const jwt = require("jsonwebtoken");
+const { userAuth } = require("./middlewares/auth");
 
 /* whenever iam reading request i want that data to be parsed into the json then i want to get it */
 app.use(express.json());
@@ -37,13 +38,15 @@ app.post("/login", async (req, res) => {
     if (!user) {
       throw new Error("Invalid Credinatials");
     }
-    const isPasswordValid = await bcrypt.compare(passWord, user.passWord);
+    const isPasswordValid = await user.validatePassowrd(passWord);
     if (isPasswordValid) {
       /* Create the Jwt token */
-      const token = jwt.sign({ _id: user._id }, "Jagadeesh@#$%2705");
+      const token = await user.getJwt();
 
       /* add the token and send the response back to the server */
-      res.cookie("token", token);
+      res.cookie("token", token, {
+        expires: new Date(Date.now() + 8 * 3600000),
+      });
 
       res.send("Login Successfull!!");
     } else {
@@ -54,113 +57,21 @@ app.post("/login", async (req, res) => {
   }
 });
 
-app.get("/profile", async (req, res) => {
+app.get("/profile", userAuth, async (req, res) => {
   try {
-    const cookie = req.cookies;
-    const { token } = cookie;
-    if (!token) {
-      throw new Error("invalid token");
-    }
-    const decoded = jwt.verify(token, "Jagadeesh@#$%2705");
-    const user = await User.findById(decoded._id);
-    if (!user) {
-      throw new Error("user doesnot exist");
-    }
+    const user = req.user;
     res.send(user);
   } catch (err) {
     res.status(400).send("Error :" + err.message);
   }
 });
 
-/* get the user by email id */
-app.get("/user", async (req, res) => {
-  const userEmailId = req.body.emailId;
+app.get("/sendConnectionRequest", userAuth, async (req, res) => {
   try {
-    const user = await User.findOne({});
-    res.send(user);
-    // const users = await User.find({ emailId: userEmailId });
-    // if (users.length === 0) {
-    //   res.send("user not found");
-    // } else {
-    //   res.send(users);
-    // }
+    const user = req.user;
+    res.send(user.firstName + " connection request made");
   } catch (err) {
-    res.status(400).status("something went wrong");
-  }
-});
-
-/* get all users */
-app.get("/feed", async (req, res) => {
-  try {
-    const allUsers = await User.find();
-    res.send(allUsers);
-  } catch (err) {
-    res.send(400).status("something went wrong");
-  }
-});
-
-/* delete the user */
-app.delete("/user", async (req, res) => {
-  const userId = req.body.userId;
-  try {
-    const user = await User.findByIdAndDelete(userId);
-    res.send("deleted the user successfully");
-  } catch (err) {
-    res.status(400).send("something went wrong");
-  }
-});
-
-/* Update the User by UserId */
-app.patch("/user/:userId", async (req, res) => {
-  const userId = req.params?.userId;
-  const data = req.body;
-  try {
-    const ALLOWED_UPDATES = ["photourl", "about", "gender", "age", "skills"];
-    const isUpdateAllowed = Object.keys(data).every((k) =>
-      ALLOWED_UPDATES.includes(k)
-    );
-    if (!isUpdateAllowed) {
-      throw new Error("Update Not Allowed");
-    }
-    if (data.skills.length > 10) {
-      throw new Error("Skills can't be more than 10");
-    }
-    /* this user will return before updating data in mongodb if you keep after then update data returns */
-    const user = await User.findOneAndUpdate(
-      { _id: userId },
-      data,
-      {
-        returnDocument: "before",
-      },
-      { runValidatore: true }
-    );
-    console.log(user, "id");
-    res.send("updated user data successfully");
-  } catch (err) {
-    res.status(400).send("Update Failed:" + err.message);
-  }
-});
-
-/* Update the user by emailId */
-app.patch("/user", async (req, res) => {
-  const emailId = req.body.emailId;
-  const data = req.body;
-  try {
-    const ALLOWED_UPDATES = ["photourl", "about", "gender", "age", "skills"];
-    const isUpdateAllowed = Object.keys(data).every((k) =>
-      ALLOWED_UPDATES.includes(k)
-    );
-    if (!isUpdateAllowed) {
-      throw new Error("Update Not Allowed");
-    }
-    if (data.skills.length > 10) {
-      throw new Error("Skills can't be more than 10");
-    }
-    const user = await User.findOneAndUpdate({ emailId: emailId }, data);
-    console.log(user, "email");
-    res.status("user updated by emailid successfully");
-  } catch (err) {
-    res.status(400).send("something went wrong");
+    res.status(400).send("Err :" + err.message);
   }
 });
 
