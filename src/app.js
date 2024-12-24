@@ -2,7 +2,15 @@ const express = require("express");
 const connectDB = require("./config/database");
 const app = express();
 const cookieParser = require("cookie-parser");
+const cors = require("cors");
 
+/* for resovling the cors issue */
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
 /* whenever iam reading request i want that data to be parsed into the json then i want to get it */
 app.use(express.json());
 /* whenever you need cookie you need to parse and use it */
