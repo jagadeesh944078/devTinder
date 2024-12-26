@@ -6,7 +6,7 @@ const userAuth = async (req, res, next) => {
     const cookie = req.cookies;
     const { token } = cookie;
     if (!token) {
-      throw new Error("Token Not Exist");
+      return res.status(401).send("Please Login!");
     }
     const decodedObj = await jwt.verify(token, "Jagadeesh@#$%2705");
     const { _id } = decodedObj;
@@ -17,7 +17,7 @@ const userAuth = async (req, res, next) => {
     req.user = user;
     next();
   } catch (err) {
-    res.status(400).send("Err :" + err.message);
+    res.status(401).send("Err :" + err.message);
   }
 };
 
