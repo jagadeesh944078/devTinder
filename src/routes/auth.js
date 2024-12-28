@@ -7,13 +7,15 @@ const User = require("../models/user");
 authRouter.post("/signup", async (req, res) => {
   try {
     validationSignup(req);
-    const { firstName, lastName, emailId, passWord } = req.body;
+    const { firstName, lastName, emailId, passWord, age, gender } = req.body;
     const passwordHash = await bcrypt.hash(passWord, 10);
     const user = new User({
       firstName,
       lastName,
       emailId,
       passWord: passwordHash,
+      age,
+      gender,
     });
     await user.save();
     res.send("user data saved successfully");
